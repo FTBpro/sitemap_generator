@@ -43,8 +43,7 @@ module SitemapGenerator
       end
 
       # Use a new LinkSet instance
-      def reset!(*args)
-        puts "new instance created"
+      def reset!
         @link_set = LinkSet.new
       end
     end).new

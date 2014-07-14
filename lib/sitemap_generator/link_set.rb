@@ -34,7 +34,6 @@ module SitemapGenerator
       reset!
       exclude_keys = opts.delete(:exclude_keys) || []
       @schemas= SitemapGenerator::SCHEMAS.reject{ |k, v| exclude_keys.include? k }
-      sitemap
       set_options(opts)
       if verbose
         start_time = Time.now

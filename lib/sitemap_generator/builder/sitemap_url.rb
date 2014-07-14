@@ -37,8 +37,8 @@ module SitemapGenerator
           path = sitemap.location.path_in_public
         end
 
-        SitemapGenerator::Utilities.assert_valid_keys(options, :priority, :changefreq, :lastmod, :expires, :host, :images, :video, :geo, :news, :videos, :mobile, :alternate, :alternates, :pagemap, :data)
-        SitemapGenerator::Utilities.reverse_merge!(options, :priority => 0.5, :changefreq => 'weekly', :lastmod => Time.now, :images => [], :news => {}, :videos => [], :mobile => false, :alternates => [], :data => false)
+        SitemapGenerator::Utilities.assert_valid_keys(options, :priority, :changefreq, :lastmod, :expires, :host, :images, :video, :geo, :news, :videos, :mobile, :alternate, :alternates, :pagemap)
+        SitemapGenerator::Utilities.reverse_merge!(options, :priority => 0.5, :changefreq => 'weekly', :lastmod => Time.now, :images => [], :news => {}, :videos => [], :mobile => false, :alternates => [])
         raise "Cannot generate a url without a host" unless SitemapGenerator::Utilities.present?(options[:host])
 
         if video = options.delete(:video)
@@ -63,8 +63,7 @@ module SitemapGenerator
           :geo        => options[:geo],
           :mobile     => options[:mobile],
           :alternates => options[:alternates],
-          :pagemap    => options[:pagemap],
-          :data       => options[:data]
+          :pagemap    => options[:pagemap]
         )
       end
 
@@ -163,12 +162,6 @@ module SitemapGenerator
                 end
               end
             end
-          end
-
-          unless SitemapGenerator::Utilities.blank?(self[:data])
-            builder.data {
-              builder.display
-            }
           end
         end
         builder << '' # Force to string
