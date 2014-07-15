@@ -383,7 +383,8 @@ module SitemapGenerator
     def set_customized_schemas(opts)
       exclude_keys = opts.delete(:exclude_keys) || []
       @schemas= SitemapGenerator::SCHEMAS.reject{ |k, v| exclude_keys.include? k }
-      @schema_location = SitemapGenerator::SCHEMA_LOCATION + " " + opts.delete(:schema_location).to_s
+      @schema_location = [SitemapGenerator::SCHEMA_LOCATION,
+                          opts.delete(:schema_location).to_s].join(" ").strip()
     end
 
     # Set each option on this instance using accessor methods.  This will affect

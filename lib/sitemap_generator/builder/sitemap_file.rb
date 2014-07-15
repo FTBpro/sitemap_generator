@@ -164,7 +164,7 @@ module SitemapGenerator
       def new
         location = @location.dup
         location.delete(:filename) if location.namer
-        self.class.new(location)
+        self.class.new(location, @schemas, @schema_location)
       end
     end
   end
