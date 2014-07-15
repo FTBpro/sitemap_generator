@@ -26,11 +26,7 @@ module SitemapGenerator
         @xml_content = '' # XML urlset content
         @schemas = schemas
         @schema_location = schema_location
-        @xml_wrapper_start = <<-HTML
-          "#{xml_wrapper_start}"
-        HTML
-        @xml_wrapper_start.gsub!(/\s+/, ' ').gsub!(/ *> */, '>').strip!
-        @xml_wrapper_start = @xml_wrapper_start.slice(1..-2)
+        @xml_wrapper_start = xml_wrapper_start.gsub(/\s+/, ' ').gsub(/ *> */, '>').strip.slice(1..-2)
         @xml_wrapper_end   = %q[</urlset>]
         @filesize = SitemapGenerator::Utilities.bytesize(@xml_wrapper_start) + SitemapGenerator::Utilities.bytesize(@xml_wrapper_end)
         @written = false
@@ -42,14 +38,16 @@ module SitemapGenerator
         wrapper_start = '<?xml version="1.0" encoding="UTF-8"?>
             <urlset
               xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"'
-
         schema_location = "xsi:schemaLocation=\"#{@schema_location}\""
         general_schema = 'xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"'
         customized_schemas = @schemas.collect do |schema, content|
           "xmlns:#{schema}=\"#{content}\""
         end
         wrapper_end = 'xmlns:xhtml="http://www.w3.org/1999/xhtml">'
-        return [wrapper_start, schema_location, general_schema, customized_schemas, wrapper_end].join(" ")
+        xml_start = [wrapper_start, schema_location, general_schema, customized_schemas, wrapper_end].join(" ")
+        return <<-HTML
+          "#{xml_start}"
+        HTML
       end
 
       # If a name has been reserved, use the last modified time from the file.
