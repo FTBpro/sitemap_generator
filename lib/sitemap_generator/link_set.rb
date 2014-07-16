@@ -32,8 +32,7 @@ module SitemapGenerator
     # the sitemaps may be overwritten.
     def create(opts={}, &block)
       reset!
-      exclude_keys = opts.delete(:exclude_keys) || []
-      @schemas= SitemapGenerator::SCHEMAS.reject{ |k, v| exclude_keys.include? k }
+      set_customized_schemas(opts)
       set_options(opts)
       if verbose
         start_time = Time.now
@@ -313,7 +312,8 @@ module SitemapGenerator
     # Lazy-initialize a sitemap instance and return it.
     def sitemap
       @sitemap ||= SitemapGenerator::Builder::SitemapFile.new(sitemap_location,
-                                                              schemas)
+                                                              schemas,
+                                                              schema_location)
     end
 
     # Lazy-initialize a sitemap index instance and return it.
@@ -369,12 +369,23 @@ module SitemapGenerator
       @schemas || SCHEMAS
     end
 
+    def schema_location
+      @schema_location || SCHEMA_LOCATION
+    end
+
     # Return a boolean indicating whether or not to yield the sitemap.
     def yield_sitemap?
       @yield_sitemap.nil? ? SitemapGenerator.yield_sitemap? : !!@yield_sitemap
     end
 
     protected
+
+    def set_customized_schemas(opts)
+      exclude_keys = opts.delete(:exclude_keys) || []
+      @schemas= SitemapGenerator::SCHEMAS.reject{ |k, v| exclude_keys.include? k }
+      @schema_location = [SitemapGenerator::SCHEMA_LOCATION,
+                          opts.delete(:schema_location).to_s].join(" ").strip()
+    end
 
     # Set each option on this instance using accessor methods.  This will affect
     # both the sitemap and the sitemap index.
@@ -419,7 +430,8 @@ module SitemapGenerator
         :adapter,
         :create_index,
         :compress,
-        :schemas
+        :schemas,
+        :schema_location
       ].inject({}) do |hash, key|
         if !(value = instance_variable_get(:"@#{key}")).nil?
           hash[key] = value
@@ -662,3 +674,4 @@ module SitemapGenerator
     include LocationHelpers
   end
 end
+

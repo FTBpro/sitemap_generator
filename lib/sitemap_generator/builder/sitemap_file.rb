@@ -19,17 +19,14 @@ module SitemapGenerator
       #
       # * <tt>location</tt> - a SitemapGenerator::SitemapLocation instance or a Hash of options
       #   from which a SitemapLocation will be created for you.
-      def initialize(opts={}, schemas)
+      def initialize(opts={}, schemas, schema_location)
         @location = opts.is_a?(Hash) ? SitemapGenerator::SitemapLocation.new(opts) : opts
         @link_count = 0
         @news_count = 0
         @xml_content = '' # XML urlset content
         @schemas = schemas
-        @xml_wrapper_start = <<-HTML
-          "#{all_schemas}"
-        HTML
-        @xml_wrapper_start.gsub!(/\s+/, ' ').gsub!(/ *> */, '>').strip!
-        @xml_wrapper_start = @xml_wrapper_start.slice(1..-2)
+        @schema_location = schema_location
+        @xml_wrapper_start = xml_wrapper_start.gsub(/\s+/, ' ').gsub(/ *> */, '>').strip.slice(1..-2)
         @xml_wrapper_end   = %q[</urlset>]
         @filesize = SitemapGenerator::Utilities.bytesize(@xml_wrapper_start) + SitemapGenerator::Utilities.bytesize(@xml_wrapper_end)
         @written = false
@@ -37,16 +34,20 @@ module SitemapGenerator
         @frozen = false      # rather than actually freeze, use this boolean
       end
 
-      def all_schemas
-        xml_start = '<?xml version="1.0" encoding="UTF-8"?>
+      def xml_wrapper_start
+        wrapper_start = '<?xml version="1.0" encoding="UTF-8"?>
             <urlset
-              xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-              xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9
-                http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd"
-              xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" '
-        xml_schemas = (@schemas.collect do |schema, content|  "xmlns:#{schema}=\"#{content}\"\n" end).join(" ")
-        xml_end = 'xmlns:xhtml="http://www.w3.org/1999/xhtml" >'
-        return xml_start + xml_schemas + xml_end
+              xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"'
+        schema_location = "xsi:schemaLocation=\"#{@schema_location}\""
+        general_schema = 'xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"'
+        customized_schemas = @schemas.collect do |schema, content|
+          "xmlns:#{schema}=\"#{content}\""
+        end
+        wrapper_end = 'xmlns:xhtml="http://www.w3.org/1999/xhtml">'
+        xml_start = [wrapper_start, schema_location, general_schema, customized_schemas, wrapper_end].join(" ")
+        return <<-HTML
+          "#{xml_start}"
+        HTML
       end
 
       # If a name has been reserved, use the last modified time from the file.
@@ -163,8 +164,9 @@ module SitemapGenerator
       def new
         location = @location.dup
         location.delete(:filename) if location.namer
-        self.class.new(location)
+        self.class.new(location, @schemas, @schema_location)
       end
     end
   end
 end
+

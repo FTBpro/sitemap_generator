@@ -35,6 +35,8 @@ module SitemapGenerator
       'pagemap' => 'http://www.google.com/schemas/sitemap-pagemap/1.0',
       'video'   => 'http://www.google.com/schemas/sitemap-video/1.1'
     }
+    SCHEMA_LOCATION = "http://www.sitemaps.org/schemas/sitemap/0.9
+                       http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd"
 
     # Lazy-initialize the LinkSet instance
     Sitemap = (Class.new do
@@ -80,3 +82,4 @@ module SitemapGenerator
 end
 
 require 'sitemap_generator/railtie' if SitemapGenerator.app.rails3?
+
